@@ -1,5 +1,6 @@
-package DecorAndFacade.decorator;
+package DecorAndFacade.First;
 
 public interface Course {
     String deliverContent();
+    String hours();
 }

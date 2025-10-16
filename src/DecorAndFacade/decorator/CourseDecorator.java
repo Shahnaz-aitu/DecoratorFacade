@@ -1,4 +1,5 @@
 package DecorAndFacade.decorator;
+import DecorAndFacade.First.Course;
 
 public class CourseDecorator implements Course {
     private Course course;
@@ -7,6 +8,11 @@ public class CourseDecorator implements Course {
     }
     @Override
     public String deliverContent(){
-        return course.deliverContent();
+        return course.deliverContent() +course.hours();
     }
+    @Override
+    public String hours(){
+        return course.hours();
+    }
+
 }

@@ -1,4 +1,6 @@
 package DecorAndFacade;
+import DecorAndFacade.First.MathCourse;
+import DecorAndFacade.First.ProgrammingCourse;
 import DecorAndFacade.decorator.*;
 
 import java.util.Scanner;
@@ -9,6 +11,11 @@ public class StudentPortalFacade {
     public String courseName;
     private boolean learningStarted = false;
 
+    public String logIn() {
+        System.out.println("LogIn please: ");
+        String studentName = scanner.nextLine();
+        return studentName;
+    }
     public String enrollInCourse() {
         MathCourse mathCourse = new MathCourse();
         ProgrammingCourse programmingCourse = new ProgrammingCourse();

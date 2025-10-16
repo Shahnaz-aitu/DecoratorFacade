@@ -4,10 +4,14 @@ import java.util.Scanner;
 public class Application {
     StudentPortalFacade personChoice= new StudentPortalFacade();
     Scanner scanner = new Scanner(System.in);
-    String name=null;
+
+    String name=new StudentPortalFacade().logIn();
 
     public void task() {
-       while (true){
+        while (name.equals("")) {
+            System.out.println("Please enter your name");
+        }
+           while (true){
             System.out.println("Write action: (enroll in course)(start learning)(complete course)");
             String action = scanner.nextLine().toLowerCase();
             switch (action) {
