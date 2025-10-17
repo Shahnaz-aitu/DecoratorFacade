@@ -7,7 +7,7 @@ public class MentorSupportDecorator extends CourseDecorator {
         super(course);
     }
     private void mentorHelp() {
-        System.out.println("Mentor: Don’t worry! Let me explain...");
+        System.out.println("Mentor:Wow! Let me explain...");
         System.out.println("Tip: Review the concept again and try next time!");
     }
     @Override
