@@ -60,41 +60,66 @@ public class StudentPortalFacade {
         }
         String courseName = student.getEnrolledCourse().toLowerCase();
         String support=student.getSupported();
-        Course baseCourse;
-        switch (courseName) {
-            case "math":
-                baseCourse = new MathCourse();
-                break;
-            case "programming":
-                baseCourse = new ProgrammingCourse();
-                break;
-            case "both":
-                baseCourse = new BothCourse();
-                break;
-            default:
-                System.out.println("Unknown course!");
-                return;
+        Course currentCourse;
+
+        if(support.equals("mentor")) {
+            if (courseName.equals("math")) {
+                currentCourse = new MentorSupportDecorator(new MathCourse());
+            } else if (courseName.equals("programming")) {
+                currentCourse = new MentorSupportDecorator(new ProgrammingCourse());
+            } else{
+                currentCourse = new MentorSupportDecorator(new BothCourse());
+            }
+            System.out.println("Starting lessons in " + courseName + "...");
+            currentCourse.lesson1();
+            currentCourse.lesson2();
+            currentCourse.lesson3();}
+
+        else if(support.equals("gamification")){
+            if (courseName.equals("math")) {
+                currentCourse =new GamificationDecorator(new MathCourse());
+            }
+            else if(courseName.equals("programming")) {
+                currentCourse = new GamificationDecorator(new ProgrammingCourse());
+            }
+            else {currentCourse = new GamificationDecorator(new BothCourse());}
+            System.out.println("Starting lessons in " + courseName + "...");
+            currentCourse.lesson1();
+            currentCourse.lesson2();
+            currentCourse.lesson3();
+            currentCourse.conclusion();}
+
+        else if(support.equals("both")){
+            if (courseName.equals("math")) {
+                currentCourse = new BothDecorator(new MathCourse());
+            }
+            else if(courseName.equals("programming")) {
+                currentCourse = new BothDecorator(new ProgrammingCourse());
+            }
+            else {currentCourse = new BothDecorator(new BothCourse());}
+            System.out.println("Starting lessons in " + courseName + "...");
+            currentCourse.lesson1();
+            currentCourse.lesson2();
+            currentCourse.lesson3();
+            currentCourse.conclusion();
         }
 
-        if (support.equals("mentor"))
-            baseCourse = new MentorSupportDecorator(baseCourse);
-        else if (support.equals("gamification"))
-            baseCourse = new GamificationDecorator(baseCourse);
-        else if (support.equals("both"))
-            baseCourse = new BothDecorator(baseCourse);
-
-        System.out.println("Starting lessons in " + courseName + "...\n");
-
-        baseCourse.lesson1();
-        baseCourse.lesson2();
-        baseCourse.lesson3();
-
-        if (support.equals("gamification") || support.equals("both"))
-            baseCourse.conclusion();
+        else{
+            if (courseName.equals("math")) {
+                currentCourse = new MathCourse();
+            }
+            else if(courseName.equals("programming")) {
+                currentCourse = new ProgrammingCourse();
+            }
+            else {currentCourse = new BothCourse();}
+            System.out.println("Starting lessons in " + courseName + "...");
+            currentCourse.lesson1();
+            currentCourse.lesson2();
+            currentCourse.lesson3();
+        }
 
         System.out.println("Course completed!");
         student.addAttendee();
-
     }
     public void completeCourse() {
         Course currentCours;
