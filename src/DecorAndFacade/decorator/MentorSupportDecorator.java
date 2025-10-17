@@ -6,12 +6,27 @@ public class MentorSupportDecorator extends CourseDecorator {
     public MentorSupportDecorator(Course course) {
         super(course);
     }
-    public String getMentor() {
-        return "Mentor Supported.";
+    private void mentorHelp() {
+        System.out.println("Mentor: Don’t worry! Let me explain...");
+        System.out.println("Tip: Review the concept again and try next time!");
     }
     @Override
-    public String deliverContent(){
-        return super.deliverContent() + getMentor()+super.hours();
+    public void lesson1() {
+         super.lesson1();
+        mentorHelp();
     }
-
+    @Override
+    public void lesson2() {
+        super.lesson2();
+        mentorHelp();
+    }
+    @Override
+    public void lesson3() {
+       super.lesson3();
+       mentorHelp();
+    }
+    @Override
+    public String deliverContent() {
+        return super.deliverContent() + "[Mentor Support]\n";
+    }
 }

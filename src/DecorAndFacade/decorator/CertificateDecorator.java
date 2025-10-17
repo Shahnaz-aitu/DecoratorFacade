@@ -11,6 +11,6 @@ public class CertificateDecorator extends CourseDecorator {
     }
     @Override
     public String deliverContent(){
-        return getCourseCertificate() + super.deliverContent()+super.hours();
+        return getCourseCertificate() + super.deliverContent();
     }
 }

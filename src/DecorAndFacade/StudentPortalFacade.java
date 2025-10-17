@@ -1,84 +1,136 @@
 package DecorAndFacade;
-import DecorAndFacade.First.MathCourse;
-import DecorAndFacade.First.ProgrammingCourse;
+import DecorAndFacade.First.*;
+import DecorAndFacade.BuilderForLogin.*;
 import DecorAndFacade.decorator.*;
-
 import java.util.Scanner;
 
 public class StudentPortalFacade {
     Scanner scanner = new Scanner(System.in);
-    public String enrolledCourse;
-    public String courseName;
-    private boolean learningStarted = false;
-
-    public String logIn() {
-        System.out.println("LogIn please: ");
-        String studentName = scanner.nextLine();
-        return studentName;
+    private StudentDirector director;
+    private Course currentCourse;
+    public StudentPortalFacade(StudentDirector director) {
+        this.director = director;
     }
+
     public String enrollInCourse() {
-        MathCourse mathCourse = new MathCourse();
-        ProgrammingCourse programmingCourse = new ProgrammingCourse();
-        MentorSupportDecorator mentorMath = new MentorSupportDecorator(mathCourse);
-        MentorSupportDecorator mentorProg = new MentorSupportDecorator(programmingCourse);
-        GamificationDecorator gamiMath = new GamificationDecorator(mathCourse);
-        GamificationDecorator gamiProg = new GamificationDecorator(programmingCourse);
+        Student student = director.getCurrentStudent();
+        if (student == null) return "You must log in first!";
+        System.out.println("Choose the course you want to enroll in: math / programming");
+        String course = scanner.nextLine().toLowerCase();
 
-        System.out.println("Choose a course to be enrolled(math)(programming)(both)");
-        String choice = scanner.nextLine().toLowerCase();
+        System.out.println("Do you want support? (mentor / gamification / both / none)");
+        String option = scanner.nextLine().toLowerCase();
+        if (student.getCourse() == 3 && course.equals("math") || student.getCourse() == 3 && option.equals("mentor")){
+            return "Sorry, students of course 3 cannot enroll in Math with Mentor support.";
+        }
 
-        System.out.println("What support do you want?(Mentor)(Gamification)(both)");
-        String support = scanner.nextLine().toLowerCase();
+        String content;
+        if (option.equals("mentor")) {
+            if (course.equals("math")) content = new MentorSupportDecorator(new MathCourse()).deliverContent();
+            else if(course.equals("programming"))content = new MentorSupportDecorator(new ProgrammingCourse()).deliverContent();
+            else {content = new MentorSupportDecorator(new BothCourse()).deliverContent();}
+        } else if (option.equals("gamification")) {
+            student.setHasGamification(true);
+            if (course.equals("math")) content = new GamificationDecorator(new MathCourse()).deliverContent();
+            else if(course.equals("programming"))content = new GamificationDecorator(new ProgrammingCourse()).deliverContent();
+            else {content = new GamificationDecorator(new BothCourse()).deliverContent();}
+        } else if (option.equals("both")) {
+            student.setHasGamification(true);
+            if (course.equals("math")) content = new BothDecorator(new MathCourse()).deliverContent();
+            else if(course.equals("programming"))content = new BothDecorator(new ProgrammingCourse()).deliverContent();
+            else {content = new BothDecorator(new BothCourse()).deliverContent();}
+        } else {
+            content = course.equals("math") ? new MathCourse().deliverContent() : new ProgrammingCourse().deliverContent();
+        }
 
-        String result=null;
-        switch (support) {
-            case "mentor":
-                if (choice.equals("math"))
-                    result=mentorMath.deliverContent();
-                else result= mentorProg.deliverContent();
+        student.setEnrolledCourse(course);
+        student.setSupported(option);
+        System.out.println("Successfully enrolled in " + course + "!");
+        return content;
+    }
+    public void startLearning() {
+        Student student = director.getCurrentStudent();
+        if (student == null) {
+            System.out.println("You must log in first!");
+            return;
+        }
+        if(student.getEnrolledCourse()== null) {
+            System.out.println("You must enroll in a course first!");
+            return;
+        }
+        String courseName = student.getEnrolledCourse().toLowerCase();
+        String support=student.getSupported();
+        Course baseCourse;
+        switch (courseName) {
+            case "math":
+                baseCourse = new MathCourse();
                 break;
-            case "gamification":
-                if (choice.equals("math"))
-                    result = gamiMath.deliverContent();
-                else result=gamiProg.deliverContent();
+            case "programming":
+                baseCourse = new ProgrammingCourse();
                 break;
             case "both":
-                if (choice.equals("math"))
-                    result= new MentorSupportDecorator(new GamificationDecorator(mathCourse)).deliverContent();
-                else result=new MentorSupportDecorator(new GamificationDecorator(programmingCourse)).deliverContent();
+                baseCourse = new BothCourse();
+                break;
+            default:
+                System.out.println("Unknown course!");
+                return;
         }
-        courseName=choice;
-        enrolledCourse=result;
-        return result+ " Course successfully enrolled!";
+
+        if (support.equals("mentor"))
+            baseCourse = new MentorSupportDecorator(baseCourse);
+        else if (support.equals("gamification"))
+            baseCourse = new GamificationDecorator(baseCourse);
+        else if (support.equals("both"))
+            baseCourse = new BothDecorator(baseCourse);
+
+        System.out.println("Starting lessons in " + courseName + "...\n");
+
+        baseCourse.lesson1();
+        baseCourse.lesson2();
+        baseCourse.lesson3();
+
+        if (support.equals("gamification") || support.equals("both"))
+            baseCourse.conclusion();
+
+        System.out.println("Course completed!");
+        student.addAttendee();
+
     }
+    public void completeCourse() {
+        Course currentCours;
+        Student student = director.getCurrentStudent();
 
-    public String startLearning() {
-        String courseInfo = enrolledCourse;
-        if (courseInfo == null) {
-            return "You are not enrolled in any course.";
-        } else {
-            learningStarted = true;
-            return courseInfo + " — Start Learning! ";
+        if (student.getAttendees() < 1) {
+            System.out.println("You must attend at least one lesson to complete!");
+            return;
         }
-    }
-
-    public String completeCourse() {
-        if (enrolledCourse == null) {
-            return "You are not enrolled in any course.";
+        if (student.getEnrolledCourse() == "math") {
+            if (student.hasGamification()) {
+                currentCours = new CertificateDecorator(new GamificationDecorator(new MathCourse()));
+                System.out.println("Course completed.Progress: " + (student.getAttendees() * 33) +"% ");
+            } else {
+                currentCours = new CertificateDecorator(new MathCourse());
+                System.out.println("Course completed!");
+            }
         }
-        if (!learningStarted) {
-            return "You need to start learning before completing the course!";
+            else if (student.getEnrolledCourse() == "programming") {
+            if (student.hasGamification()) {
+                currentCours = new CertificateDecorator(new GamificationDecorator(new ProgrammingCourse()));
+                System.out.println("Course completed.Progress:" + (student.getAttendees() * 33) +"% ");
+            } else {
+                currentCours = new CertificateDecorator(new ProgrammingCourse());
+                System.out.println("Course completed!");
+            }
         }
-        CertificateDecorator certificateMath= new CertificateDecorator(new MathCourse());
-        CertificateDecorator certificateProg = new CertificateDecorator(new ProgrammingCourse());
-        String courseWas = startLearning();
+            else {
+            if (student.hasGamification()) {
+                currentCours = new CertificateDecorator(new GamificationDecorator(new BothCourse()));
+                System.out.println("Course completed.Progress:" + (student.getAttendees() * 33) +"% ");
+            } else {
+                currentCours = new CertificateDecorator(new BothCourse());
+                System.out.println("Course completed!");
+            }
+        }
 
-        String completeCourse=null;
-            if (courseName.equals("math"))
-                completeCourse = certificateMath.deliverContent();
-            if (courseName.equals("programming"))
-                completeCourse = certificateProg.deliverContent();
-
-            return completeCourse;
     }
 }
